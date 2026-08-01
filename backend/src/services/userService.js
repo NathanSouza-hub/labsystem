@@ -1,4 +1,7 @@
+const bcrypt = require("bcrypt");
 const userRepository = require("../repositories/userRepository");
+
+const SALT_ROUNDS = 10;
 
 // Listar todos
 function listUsers(filters, callback) {
@@ -10,7 +13,37 @@ function getUser(id, callback) {
     userRepository.getUserById(id, callback);
 }
 
+// Contar
+function countUsers(callback) {
+    userRepository.countUsers(callback);
+}
+
+// Atualizar (senha só é alterada se enviada)
+function updateUser(id, data, callback) {
+    userRepository.updateUsername(id, data.username, (error) => {
+        if (error) return callback(error);
+
+        if (!data.password) {
+            return callback(null);
+        }
+
+        bcrypt.hash(data.password, SALT_ROUNDS, (error, hash) => {
+            if (error) return callback(error);
+
+            userRepository.updatePasswordHash(id, hash, callback);
+        });
+    });
+}
+
+// Excluir
+function deleteUser(id, callback) {
+    userRepository.deleteUser(id, callback);
+}
+
 module.exports = {
     listUsers,
-    getUser
+    getUser,
+    countUsers,
+    updateUser,
+    deleteUser
 };

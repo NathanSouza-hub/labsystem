@@ -56,9 +56,45 @@ function getUserById(id, callback) {
     });
 }
 
+// Contar usuários (usado para impedir excluir o último)
+function countUsers(callback) {
+    const sql = "SELECT COUNT(*) AS total FROM users";
+
+    connection.query(sql, (error, results) => {
+        if (error) return callback(error);
+
+        callback(null, results[0].total);
+    });
+}
+
+// Atualizar username
+function updateUsername(id, username, callback) {
+    const sql = "UPDATE users SET username = ? WHERE id = ?";
+
+    connection.query(sql, [username, id], callback);
+}
+
+// Atualizar senha
+function updatePasswordHash(id, passwordHash, callback) {
+    const sql = "UPDATE users SET password_hash = ? WHERE id = ?";
+
+    connection.query(sql, [passwordHash, id], callback);
+}
+
+// Excluir
+function deleteUser(id, callback) {
+    const sql = "DELETE FROM users WHERE id = ?";
+
+    connection.query(sql, [id], callback);
+}
+
 module.exports = {
     getUserByUsername,
     createUser,
     getAllUsers,
-    getUserById
+    getUserById,
+    countUsers,
+    updateUsername,
+    updatePasswordHash,
+    deleteUser
 };

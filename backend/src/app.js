@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
 const routes = require("./routes");
+const productRoutes = require("./routes/productRoutes");
 const authRoutes = require("./routes/authRoutes");
 const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
@@ -23,6 +24,7 @@ app.use(session({
 
 app.use(routes);
 app.use("/auth", authRoutes);
+app.use("/products", productRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

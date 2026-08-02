@@ -1,12 +1,13 @@
 # LabSystem — CRUD de Produtos
 
-Sistema de cadastro de produtos (Create, Read, Update, Delete), com autenticação por sessão.
+Sistema de cadastro de produtos (Create, Read, Update, Delete), com autenticação via JWT.
 
 **Repositório:** https://github.com/NathanSouza-hub/labsystem
 
 ## Tecnologias
 
 - **Back-end:** Node.js + Express
+- **Autenticação:** JWT (`jsonwebtoken`) em cookie httpOnly + senhas com `bcrypt`
 - **Banco de dados:** MySQL
 - **Front-end:** HTML, CSS e JavaScript puro (sem framework)
 
@@ -41,7 +42,7 @@ cd backend
 npm install
 ```
 
-Crie um arquivo `.env` dentro de `backend/` com suas credenciais do MySQL e as variáveis de sessão:
+Crie um arquivo `.env` dentro de `backend/` com suas credenciais do MySQL e o segredo do JWT:
 
 ```
 DB_HOST=localhost
@@ -50,11 +51,11 @@ DB_USER=root
 DB_PASSWORD=sua_senha
 DB_NAME=product_management
 
-SESSION_SECRET=uma_string_aleatoria_longa
+JWT_SECRET=uma_string_aleatoria_longa
 FRONTEND_URL=http://localhost:5500
 ```
 
-`FRONTEND_URL` deve apontar exatamente para a origem em que o front-end está rodando — é usada tanto no CORS quanto para os cookies de sessão funcionarem entre front e back.
+`FRONTEND_URL` deve apontar exatamente para a origem em que o front-end está rodando — é usada tanto no CORS quanto para o cookie do token JWT funcionar entre front e back.
 
 Inicie o servidor:
 
@@ -77,22 +78,24 @@ npx http-server -p 5500
 
 Depois acesse `http://localhost:5500/login.html`.
 
-> O CORS está restrito à origem definida em `FRONTEND_URL` (não é mais `*`), pois a autenticação por sessão depende de cookies — o front-end precisa rodar exatamente nessa origem.
+> O CORS está restrito à origem definida em `FRONTEND_URL` (não é mais `*`), pois a autenticação depende de cookies — o front-end precisa rodar exatamente nessa origem.
 
 ## Autenticação
 
-O sistema usa sessão (cookie `connect.sid`, via `express-session`) com senhas criptografadas por `bcrypt`. Não existe usuário pré-cadastrado: crie o seu na própria tela de login (link "Ainda não tem conta? Cadastre-se").
+O sistema usa **JWT** (`jsonwebtoken`) com senhas criptografadas por `bcrypt`. Não existe usuário pré-cadastrado: crie o seu na própria tela de login (link "Ainda não tem conta? Cadastre-se").
 
-As rotas de leitura de produtos (`GET`) continuam públicas. As rotas de escrita (`POST`, `PUT`, `DELETE`) exigem estar autenticado — sem sessão válida, retornam `401`.
+No login, o back-end gera um token assinado (payload `{ id, username }`, expira em 2h) e o envia em um cookie **httpOnly** chamado `token` — o front-end nunca lê ou manipula o token diretamente, só precisa enviar `credentials: "include"` nas requisições para o cookie ser incluído automaticamente. O middleware `requireAuth` verifica e decodifica esse token a cada requisição protegida, populando `req.user`.
+
+As rotas de leitura de produtos (`GET`) continuam públicas. As rotas de escrita (`POST`, `PUT`, `DELETE`) exigem um token válido — sem ele (ou com token expirado/adulterado), retornam `401`.
 
 | Método | Rota            | Descrição                              | Body (JSON)                              |
 |--------|-----------------|------------------------------------------|-------------------------------------------|
 | POST   | `/auth/register`| Cadastra um novo usuário                 | `{ "username": "", "password": "" }`     |
-| POST   | `/auth/login`   | Autentica e inicia a sessão              | `{ "username": "", "password": "" }`     |
-| POST   | `/auth/logout`  | Encerra a sessão atual                   | —                                         |
-| GET    | `/auth/me`      | Retorna o usuário da sessão atual        | —                                         |
+| POST   | `/auth/login`   | Autentica e gera o token JWT             | `{ "username": "", "password": "" }`     |
+| POST   | `/auth/logout`  | Limpa o cookie do token                  | —                                         |
+| GET    | `/auth/me`      | Retorna o usuário do token atual         | —                                         |
 
-`password` deve ter no mínimo 6 caracteres. Requisições ao front-end para a API precisam enviar `credentials: "include"` para que o cookie de sessão seja incluído.
+`password` deve ter no mínimo 6 caracteres. Requisições ao front-end para a API precisam enviar `credentials: "include"` para que o cookie do token seja incluído.
 
 ## Endpoints da API
 
@@ -108,7 +111,7 @@ Base URL: `http://localhost:3000`
 
 Campos obrigatórios na criação/edição: `description` (texto), `quantity` (inteiro ≥ 0), `price` (número > 0), `category` (uma das opções: Hardware, Periféricos, Componentes, Armazenamento, Redes, Informática, Outros). Requisições inválidas retornam `400` com a lista de erros.
 
-`created_by` e `created_at` **não são enviados pelo cliente**: o back-end preenche `created_by` automaticamente com o usuário autenticado na sessão no momento do cadastro, e `created_at` é preenchido pelo banco (`CURRENT_TIMESTAMP`). Na edição, `created_by` não muda — preserva o registro de quem originalmente cadastrou o produto.
+`created_by` e `created_at` **não são enviados pelo cliente**: o back-end preenche `created_by` automaticamente com o usuário autenticado (extraído do token JWT) no momento do cadastro, e `created_at` é preenchido pelo banco (`CURRENT_TIMESTAMP`). Na edição, `created_by` não muda — preserva o registro de quem originalmente cadastrou o produto.
 
 `q` faz uma busca única por ID (match exato), descrição ou usuário (`LIKE`, parcial). `category` filtra por categoria exata, combinável com `q`. `sort` aceita `id`, `created_at`, `created_by`, `price`, `description` ou `quantity` (whitelist no back-end contra SQL injection); `order` aceita `asc` ou `desc`. Todos os filtros são combináveis entre si.
 
@@ -116,7 +119,7 @@ Exemplos: `GET /products?q=teclado` (busca por descrição/ID/usuário), `GET /p
 
 ### Usuários
 
-Base URL: `http://localhost:3000`. Todas as rotas exigem sessão autenticada — qualquer usuário logado pode gerenciar qualquer conta (não há papel de admin).
+Base URL: `http://localhost:3000`. Todas as rotas exigem token JWT válido — qualquer usuário logado pode gerenciar qualquer conta (não há papel de admin).
 
 | Método | Rota          | Descrição                                   | Body (JSON)                              |
 |--------|---------------|-----------------------------------------------|-------------------------------------------|
@@ -125,7 +128,7 @@ Base URL: `http://localhost:3000`. Todas as rotas exigem sessão autenticada —
 | PUT    | `/users/:id`  | Atualiza username e, opcionalmente, a senha   | `{ "username": "", "password": "" }`     |
 | DELETE | `/users/:id`  | Exclui um usuário                             | —                                         |
 
-`password_hash` nunca é retornado pela API. No `PUT`, `password` é opcional — se omitido ou vazio, a senha atual é mantida; se enviado, precisa ter no mínimo 6 caracteres. Criação de usuário usa o mesmo endpoint de `POST /auth/register` (reaproveitado pela tela de Usuários). `DELETE` bloqueia a exclusão do último usuário do sistema (`400`) e, se o usuário excluir a própria conta, a sessão é encerrada automaticamente (resposta inclui `"selfDeleted": true`).
+`password_hash` nunca é retornado pela API. No `PUT`, `password` é opcional — se omitido ou vazio, a senha atual é mantida; se enviado, precisa ter no mínimo 6 caracteres. Criação de usuário usa o mesmo endpoint de `POST /auth/register` (reaproveitado pela tela de Usuários). `DELETE` bloqueia a exclusão do último usuário do sistema (`400`) e, se o usuário excluir a própria conta, o cookie do token é limpo automaticamente (resposta inclui `"selfDeleted": true`).
 
 ## Estrutura da tabela `products`
 
@@ -136,7 +139,7 @@ Base URL: `http://localhost:3000`. Todas as rotas exigem sessão autenticada —
 | quantity     | INT           | Quantidade em estoque         |
 | price        | DECIMAL(10,2) | Valor do produto              |
 | category     | VARCHAR(100)  | Categoria do produto (Hardware, Periféricos, Componentes, Armazenamento, Redes, Informática ou Outros) |
-| created_by   | VARCHAR(100)  | Usuário que cadastrou (preenchido automaticamente pela sessão) |
+| created_by   | VARCHAR(100)  | Usuário que cadastrou (preenchido automaticamente a partir do token JWT) |
 | created_at   | DATETIME      | Data de cadastro (automática) |
 
 ## Estrutura da tabela `users`
@@ -170,6 +173,7 @@ routes → controller → service → repository → banco de dados
 
 ## Diferenciais implementados
 
+- Autenticação via JWT (cookie httpOnly), não sessão em memória
 - Ordenação ASC/DESC dinâmica por ID, Data de Cadastro, Usuário e Valor (cabeçalhos clicáveis na tela de produtos)
 - Filtros na listagem de produtos e de usuários
 - CRUD completo de usuários (`usuarios.html`)

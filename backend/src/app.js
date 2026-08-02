@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const session = require("express-session");
+const cookieParser = require("cookie-parser");
 const routes = require("./routes");
 const productRoutes = require("./routes/productRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -14,14 +14,7 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 2 // 2 horas
-    }
-}));
+app.use(cookieParser());
 
 app.use(routes);
 app.use("/auth", authRoutes);

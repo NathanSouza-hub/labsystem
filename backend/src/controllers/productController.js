@@ -40,7 +40,7 @@ function getProductById(req, res) {
 function createProduct(req, res) {
     const product = {
         ...req.body,
-        created_by: req.session.username
+        created_by: req.user.username
     };
 
     productService.createProduct(product, (error, result) => {

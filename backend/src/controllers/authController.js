@@ -1,4 +1,12 @@
 const authService = require("../services/authService");
+const { generateToken } = require("../utils/jwt");
+
+const COOKIE_OPTIONS = {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 1000 * 60 * 60 * 2 // 2 horas
+};
 
 // Cadastrar usuário
 function register(req, res) {
@@ -28,8 +36,8 @@ function login(req, res) {
             return res.status(401).json({ error: "Usuário ou senha inválidos." });
         }
 
-        req.session.userId = user.id;
-        req.session.username = user.username;
+        const token = generateToken({ id: user.id, username: user.username });
+        res.cookie("token", token, COOKIE_OPTIONS);
 
         res.json({ message: "Login realizado com sucesso!", username: user.username });
     });
@@ -37,23 +45,13 @@ function login(req, res) {
 
 // Logout
 function logout(req, res) {
-    req.session.destroy((error) => {
-        if (error) {
-            return res.status(500).json({ error: "Erro ao encerrar sessão." });
-        }
-
-        res.clearCookie("connect.sid");
-        res.json({ message: "Logout realizado com sucesso!" });
-    });
+    res.clearCookie("token", COOKIE_OPTIONS);
+    res.json({ message: "Logout realizado com sucesso!" });
 }
 
 // Sessão atual
 function me(req, res) {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: "Não autenticado." });
-    }
-
-    res.json({ username: req.session.username });
+    res.json({ username: req.user.username });
 }
 
 module.exports = {

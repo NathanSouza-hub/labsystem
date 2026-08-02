@@ -81,16 +81,14 @@ function deleteUser(req, res) {
                 });
             }
 
-            const excluiuAPropriaConta = Number(id) === req.session.userId;
+            const excluiuAPropriaConta = Number(id) === req.user.id;
 
             if (!excluiuAPropriaConta) {
                 return res.json({ message: "Usuário excluído com sucesso!" });
             }
 
-            req.session.destroy(() => {
-                res.clearCookie("connect.sid");
-                res.json({ message: "Usuário excluído com sucesso!", selfDeleted: true });
-            });
+            res.clearCookie("token");
+            res.json({ message: "Usuário excluído com sucesso!", selfDeleted: true });
         });
     });
 }

@@ -30,8 +30,9 @@ function login(req, res) {
 
         req.session.userId = user.id;
         req.session.username = user.username;
+        req.session.name = user.name;
 
-        res.json({ message: "Login realizado com sucesso!", username: user.username });
+        res.json({ message: "Login realizado com sucesso!", username: user.username, name: user.name });
     });
 }
 
@@ -53,7 +54,7 @@ function me(req, res) {
         return res.status(401).json({ error: "Não autenticado." });
     }
 
-    res.json({ username: req.session.username });
+    res.json({ username: req.session.username, name: req.session.name });
 }
 
 module.exports = {

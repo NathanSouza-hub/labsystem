@@ -6,6 +6,8 @@ const tableWrapper = document.getElementById("table-wrapper");
 const estadoVazio = document.getElementById("estado-vazio");
 const mensagem = document.getElementById("mensagem");
 const usuarioLogado = document.getElementById("usuario-logado");
+const usuarioAvatar = document.getElementById("usuario-avatar");
+const usuarioNome = document.getElementById("usuario-nome");
 
 const overlay = document.getElementById("overlay");
 const modalTitulo = document.getElementById("modal-titulo");
@@ -101,12 +103,19 @@ async function verificarAutenticacao() {
         }
 
         const dados = await resposta.json();
-        usuarioLogado.textContent = dados.username;
+        exibirUsuarioLogado(dados);
         atualizarIndicadoresOrdenacao();
         carregarUsuarios();
     } catch (erro) {
         window.location.href = "login.html";
     }
+}
+
+function exibirUsuarioLogado(dados) {
+    const nome = dados.name || dados.username;
+    usuarioAvatar.textContent = nome.trim().charAt(0);
+    usuarioNome.textContent = nome;
+    usuarioLogado.textContent = nome;
 }
 
 async function sair() {

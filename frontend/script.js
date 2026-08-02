@@ -18,11 +18,13 @@ const campoQuantidade = document.getElementById("quantidade");
 const campoValor = document.getElementById("valor");
 
 const campoFiltroBusca = document.getElementById("filtro-busca");
+const campoFiltroPreco = document.getElementById("filtro-preco");
 const cabecalhosOrdenaveis = document.querySelectorAll(".th-ordenavel");
 
 let colunaOrdenacao = "id";
 let ordemAtual = "asc";
 let buscaAtual = "";
+let filtroPrecoAtual = "";
 let debounceBusca = null;
 
 document.getElementById("btn-menu").addEventListener("click", () => {
@@ -55,6 +57,10 @@ campoFiltroBusca.addEventListener("input", () => {
         carregarProdutos();
     }, 300);
 });
+campoFiltroPreco.addEventListener("change", () => {
+    filtroPrecoAtual = campoFiltroPreco.value;
+    carregarProdutos();
+});
 formProduto.addEventListener("submit", salvarProduto);
 
 cabecalhosOrdenaveis.forEach((th) => {
@@ -66,7 +72,15 @@ verificarAutenticacao();
 function limparFiltro() {
     buscaAtual = "";
     campoFiltroBusca.value = "";
+    filtroPrecoAtual = "";
+    campoFiltroPreco.value = "";
     carregarProdutos();
+}
+
+function parseFaixaPreco(valor) {
+    if (!valor) return [undefined, undefined];
+    const [min, max] = valor.split("-");
+    return [min || undefined, max || undefined];
 }
 
 function ordenarPor(coluna) {
@@ -125,6 +139,10 @@ async function carregarProdutos() {
     params.set("sort", colunaOrdenacao);
     params.set("order", ordemAtual);
 
+    const [precoMin, precoMax] = parseFaixaPreco(filtroPrecoAtual);
+    if (precoMin !== undefined) params.set("minPrice", precoMin);
+    if (precoMax !== undefined) params.set("maxPrice", precoMax);
+
     try {
         const resposta = await fetch(`${API_URL}?${params.toString()}`);
 
@@ -133,14 +151,15 @@ async function carregarProdutos() {
         }
 
         const produtos = await resposta.json();
+        const filtroAtivo = Boolean(buscaAtual) || Boolean(filtroPrecoAtual);
 
-        if (produtos.length === 0 && buscaAtual) {
+        if (produtos.length === 0 && filtroAtivo) {
             mensagem.textContent = "Nenhum produto encontrado.";
         } else {
             mensagem.textContent = "";
         }
 
-        if (produtos.length === 0 && !buscaAtual) {
+        if (produtos.length === 0 && !filtroAtivo) {
             tableWrapper.classList.add("hidden");
             estadoVazio.classList.remove("hidden");
         } else {

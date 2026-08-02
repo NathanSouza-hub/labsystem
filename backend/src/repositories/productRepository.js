@@ -2,22 +2,39 @@ const connection = require("../database/connection");
 
 const SORTABLE_COLUMNS = ["id", "created_at", "created_by", "price", "description", "quantity"];
 
-// Listar todos (com busca opcional por id/descrição/usuário e ordenação opcional)
+// Listar todos (com busca opcional por id/descrição/usuário, faixa de preço e ordenação opcional)
 function getAllProducts(filters, callback) {
     const params = [];
+    const condicoesWhere = [];
     let sql = "SELECT * FROM products";
 
     if (filters.q) {
-        const condicoes = ["description LIKE ?", "created_by LIKE ?"];
+        const condicoesBusca = ["description LIKE ?", "created_by LIKE ?"];
         params.push(`%${filters.q}%`, `%${filters.q}%`);
 
         const idBuscado = Number(filters.q);
         if (Number.isInteger(idBuscado)) {
-            condicoes.push("id = ?");
+            condicoesBusca.push("id = ?");
             params.push(idBuscado);
         }
 
-        sql += ` WHERE (${condicoes.join(" OR ")})`;
+        condicoesWhere.push(`(${condicoesBusca.join(" OR ")})`);
+    }
+
+    const precoMin = Number(filters.minPrice);
+    if (filters.minPrice !== undefined && filters.minPrice !== "" && !Number.isNaN(precoMin)) {
+        condicoesWhere.push("price >= ?");
+        params.push(precoMin);
+    }
+
+    const precoMax = Number(filters.maxPrice);
+    if (filters.maxPrice !== undefined && filters.maxPrice !== "" && !Number.isNaN(precoMax)) {
+        condicoesWhere.push("price <= ?");
+        params.push(precoMax);
+    }
+
+    if (condicoesWhere.length > 0) {
+        sql += ` WHERE ${condicoesWhere.join(" AND ")}`;
     }
 
     if (SORTABLE_COLUMNS.includes(filters.sort)) {

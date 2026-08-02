@@ -2,9 +2,9 @@ const productService = require("../services/productService");
 
 // Listar todos
 function getProducts(req, res) {
-    const { q, sort, order } = req.query;
+    const { q, sort, order, minPrice, maxPrice } = req.query;
 
-    productService.listProducts({ q, sort, order }, (error, products) => {
+    productService.listProducts({ q, sort, order, minPrice, maxPrice }, (error, products) => {
         if (error) {
             return res.status(500).json({
                 error: "Erro ao buscar produtos."

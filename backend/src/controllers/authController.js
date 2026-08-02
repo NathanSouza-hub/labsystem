@@ -5,7 +5,7 @@ function register(req, res) {
     authService.register(req.body, (error) => {
         if (error) {
             if (error.code === "ER_DUP_ENTRY") {
-                return res.status(409).json({ error: "Usuário já existe." });
+                return res.status(409).json({ error: "Usuário ou e-mail já cadastrado." });
             }
 
             return res.status(500).json({ error: "Erro ao cadastrar usuário." });

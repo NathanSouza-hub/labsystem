@@ -17,11 +17,15 @@ function getUserByUsername(username, callback) {
 function createUser(user, callback) {
     const sql = `
         INSERT INTO users
-        (username, password_hash)
-        VALUES (?, ?)
+        (username, password_hash, name, email, phone)
+        VALUES (?, ?, ?, ?, ?)
     `;
 
-    connection.query(sql, [user.username, user.password_hash], callback);
+    connection.query(
+        sql,
+        [user.username, user.password_hash, user.name, user.email, user.phone],
+        callback
+    );
 }
 
 // Listar todos (sem expor password_hash), com busca opcional por id/username

@@ -7,6 +7,10 @@ const btnEnviar = document.getElementById("btn-enviar");
 const linkAlternar = document.getElementById("link-alternar");
 const campoUsername = document.getElementById("username");
 const campoPassword = document.getElementById("password");
+const camposCadastro = document.getElementById("campos-cadastro");
+const campoNome = document.getElementById("nome");
+const campoEmail = document.getElementById("email");
+const campoTelefone = document.getElementById("telefone");
 
 let modoRegistro = false;
 
@@ -16,6 +20,11 @@ linkAlternar.addEventListener("click", (evento) => {
     evento.preventDefault();
     modoRegistro = !modoRegistro;
     formErros.textContent = "";
+
+    camposCadastro.classList.toggle("hidden", !modoRegistro);
+    campoNome.required = modoRegistro;
+    campoEmail.required = modoRegistro;
+    campoTelefone.required = modoRegistro;
 
     if (modoRegistro) {
         titulo.textContent = "Criar conta";
@@ -37,7 +46,10 @@ form.addEventListener("submit", async (evento) => {
 
     try {
         if (modoRegistro) {
-            await registrar(username, password);
+            const nome = campoNome.value.trim();
+            const email = campoEmail.value.trim();
+            const telefone = campoTelefone.value.trim();
+            await registrar(username, password, nome, email, telefone);
         }
 
         await entrar(username, password);
@@ -47,11 +59,11 @@ form.addEventListener("submit", async (evento) => {
     }
 });
 
-async function registrar(username, password) {
+async function registrar(username, password, name, email, phone) {
     const resposta = await fetch(`${API_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password, name, email, phone })
     });
 
     const dados = await resposta.json();

@@ -702,3 +702,7 @@ td button:active {
 .login-alternar a:hover {
   text-decoration: underline;
 }
+
+.campos-cadastro.hidden {
+  display: none;
+}

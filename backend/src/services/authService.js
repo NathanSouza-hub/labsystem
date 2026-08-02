@@ -9,7 +9,13 @@ function register(user, callback) {
         if (error) return callback(error);
 
         userRepository.createUser(
-            { username: user.username, password_hash: hash },
+            {
+                username: user.username,
+                password_hash: hash,
+                name: user.name,
+                email: user.email,
+                phone: user.phone
+            },
             callback
         );
     });

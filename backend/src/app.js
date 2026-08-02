@@ -9,8 +9,18 @@ const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
 const app = express();
 
+// aceita tanto "localhost" quanto "127.0.0.1" na mesma porta do FRONTEND_URL,
+// já que o navegador trata as duas como origens diferentes
+const ALLOWED_ORIGINS = [
+    ...new Set([
+        process.env.FRONTEND_URL,
+        process.env.FRONTEND_URL.replace("localhost", "127.0.0.1"),
+        process.env.FRONTEND_URL.replace("127.0.0.1", "localhost")
+    ])
+];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: ALLOWED_ORIGINS,
     credentials: true
 }));
 app.use(express.json());

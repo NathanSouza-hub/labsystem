@@ -13,18 +13,19 @@ const formProduto = document.getElementById("form-produto");
 const formErros = document.getElementById("form-erros");
 
 const campoId = document.getElementById("produto-id");
+const campoCategoria = document.getElementById("categoria");
 const campoDescricao = document.getElementById("descricao");
 const campoQuantidade = document.getElementById("quantidade");
 const campoValor = document.getElementById("valor");
 
 const campoFiltroBusca = document.getElementById("filtro-busca");
-const campoFiltroPreco = document.getElementById("filtro-preco");
+const campoFiltroCategoria = document.getElementById("filtro-categoria");
 const cabecalhosOrdenaveis = document.querySelectorAll(".th-ordenavel");
 
 let colunaOrdenacao = "id";
 let ordemAtual = "asc";
 let buscaAtual = "";
-let filtroPrecoAtual = "";
+let filtroCategoriaAtual = "";
 let debounceBusca = null;
 
 document.getElementById("btn-menu").addEventListener("click", () => {
@@ -57,8 +58,8 @@ campoFiltroBusca.addEventListener("input", () => {
         carregarProdutos();
     }, 300);
 });
-campoFiltroPreco.addEventListener("change", () => {
-    filtroPrecoAtual = campoFiltroPreco.value;
+campoFiltroCategoria.addEventListener("change", () => {
+    filtroCategoriaAtual = campoFiltroCategoria.value;
     carregarProdutos();
 });
 formProduto.addEventListener("submit", salvarProduto);
@@ -72,15 +73,9 @@ verificarAutenticacao();
 function limparFiltro() {
     buscaAtual = "";
     campoFiltroBusca.value = "";
-    filtroPrecoAtual = "";
-    campoFiltroPreco.value = "";
+    filtroCategoriaAtual = "";
+    campoFiltroCategoria.value = "";
     carregarProdutos();
-}
-
-function parseFaixaPreco(valor) {
-    if (!valor) return [undefined, undefined];
-    const [min, max] = valor.split("-");
-    return [min || undefined, max || undefined];
 }
 
 function ordenarPor(coluna) {
@@ -139,9 +134,7 @@ async function carregarProdutos() {
     params.set("sort", colunaOrdenacao);
     params.set("order", ordemAtual);
 
-    const [precoMin, precoMax] = parseFaixaPreco(filtroPrecoAtual);
-    if (precoMin !== undefined) params.set("minPrice", precoMin);
-    if (precoMax !== undefined) params.set("maxPrice", precoMax);
+    if (filtroCategoriaAtual) params.set("category", filtroCategoriaAtual);
 
     try {
         const resposta = await fetch(`${API_URL}?${params.toString()}`);
@@ -151,7 +144,7 @@ async function carregarProdutos() {
         }
 
         const produtos = await resposta.json();
-        const filtroAtivo = Boolean(buscaAtual) || Boolean(filtroPrecoAtual);
+        const filtroAtivo = Boolean(buscaAtual) || Boolean(filtroCategoriaAtual);
 
         if (produtos.length === 0 && filtroAtivo) {
             mensagem.textContent = "Nenhum produto encontrado.";
@@ -182,6 +175,7 @@ function renderizarTabela(produtos) {
             <td>${produto.id}</td>
             <td>${formatarData(produto.created_at)}</td>
             <td>${produto.created_by}</td>
+            <td>${produto.category}</td>
             <td>${produto.description}</td>
             <td>${produto.quantity}</td>
             <td>${formatarValor(produto.price)}</td>
@@ -259,6 +253,7 @@ function abrirModal(produto) {
     if (produto) {
         modalTitulo.textContent = "Editar Produto";
         campoId.value = produto.id;
+        campoCategoria.value = produto.category;
         campoDescricao.value = produto.description;
         campoQuantidade.value = produto.quantity;
         campoValor.value = produto.price;
@@ -281,6 +276,7 @@ async function salvarProduto(evento) {
 
     const id = campoId.value;
     const corpo = {
+        category: campoCategoria.value,
         description: campoDescricao.value.trim(),
         quantity: Number(campoQuantidade.value),
         price: Number(campoValor.value)

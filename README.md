@@ -100,19 +100,19 @@ Base URL: `http://localhost:3000`
 
 | Método | Rota            | Descrição                          | Autenticação | Body (JSON)                                       |
 |--------|-----------------|-------------------------------------|--------------|----------------------------------------------------|
-| GET    | `/products`     | Lista produtos (aceita `?q=`, `?sort=`, `?order=asc\|desc`) | não          | —                                     |
+| GET    | `/products`     | Lista produtos (aceita `?q=`, `?category=`, `?sort=`, `?order=asc\|desc`) | não          | —                                     |
 | GET    | `/products/:id` | Busca um produto pelo ID            | não          | —                                                    |
-| POST   | `/products`     | Cadastra um novo produto            | sim          | `{ "description": "", "quantity": 0, "price": 0 }`  |
-| PUT    | `/products/:id` | Atualiza um produto existente       | sim          | `{ "description": "", "quantity": 0, "price": 0 }`  |
+| POST   | `/products`     | Cadastra um novo produto            | sim          | `{ "description": "", "quantity": 0, "price": 0, "category": "" }`  |
+| PUT    | `/products/:id` | Atualiza um produto existente       | sim          | `{ "description": "", "quantity": 0, "price": 0, "category": "" }`  |
 | DELETE | `/products/:id` | Exclui um produto                   | sim          | —                                                    |
 
-Campos obrigatórios na criação/edição: `description` (texto), `quantity` (inteiro ≥ 0), `price` (número > 0). Requisições inválidas retornam `400` com a lista de erros.
+Campos obrigatórios na criação/edição: `description` (texto), `quantity` (inteiro ≥ 0), `price` (número > 0), `category` (uma das opções: Hardware, Periféricos, Componentes, Armazenamento, Redes, Informática, Outros). Requisições inválidas retornam `400` com a lista de erros.
 
 `created_by` e `created_at` **não são enviados pelo cliente**: o back-end preenche `created_by` automaticamente com o usuário autenticado na sessão no momento do cadastro, e `created_at` é preenchido pelo banco (`CURRENT_TIMESTAMP`). Na edição, `created_by` não muda — preserva o registro de quem originalmente cadastrou o produto.
 
-`q` faz uma busca única por ID (match exato), descrição ou usuário (`LIKE`, parcial). `sort` aceita `id`, `created_at`, `created_by` ou `price` (whitelist no back-end contra SQL injection); `order` aceita `asc` ou `desc`. Todos são combináveis entre si.
+`q` faz uma busca única por ID (match exato), descrição ou usuário (`LIKE`, parcial). `category` filtra por categoria exata, combinável com `q`. `sort` aceita `id`, `created_at`, `created_by`, `price`, `description` ou `quantity` (whitelist no back-end contra SQL injection); `order` aceita `asc` ou `desc`. Todos os filtros são combináveis entre si.
 
-Exemplos: `GET /products?q=teclado` (busca por descrição/ID/usuário), `GET /products?sort=price&order=desc` (ordena por valor, decrescente).
+Exemplos: `GET /products?q=teclado` (busca por descrição/ID/usuário), `GET /products?category=Hardware` (filtra por categoria), `GET /products?q=mouse&category=Periféricos` (busca + categoria combinados), `GET /products?sort=price&order=desc` (ordena por valor, decrescente).
 
 ### Usuários
 
@@ -135,6 +135,7 @@ Base URL: `http://localhost:3000`. Todas as rotas exigem sessão autenticada —
 | description  | VARCHAR(255)  | Descrição do produto          |
 | quantity     | INT           | Quantidade em estoque         |
 | price        | DECIMAL(10,2) | Valor do produto              |
+| category     | VARCHAR(100)  | Categoria do produto (Hardware, Periféricos, Componentes, Armazenamento, Redes, Informática ou Outros) |
 | created_by   | VARCHAR(100)  | Usuário que cadastrou (preenchido automaticamente pela sessão) |
 | created_at   | DATETIME      | Data de cadastro (automática) |
 

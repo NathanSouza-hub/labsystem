@@ -1,5 +1,15 @@
+const CATEGORIAS_VALIDAS = [
+    "Hardware",
+    "Periféricos",
+    "Componentes",
+    "Armazenamento",
+    "Redes",
+    "Informática",
+    "Outros"
+];
+
 function validateProduct(req, res, next) {
-    const { description, quantity, price } = req.body;
+    const { description, quantity, price, category } = req.body;
     const errors = [];
 
     if (!description || typeof description !== "string" || !description.trim()) {
@@ -12,6 +22,10 @@ function validateProduct(req, res, next) {
 
     if (price === undefined || price === null || typeof price !== "number" || price <= 0) {
         errors.push("price é obrigatório e deve ser um número maior que 0.");
+    }
+
+    if (!category || !CATEGORIAS_VALIDAS.includes(category)) {
+        errors.push("category é obrigatória e deve ser uma das opções válidas.");
     }
 
     if (errors.length > 0) {

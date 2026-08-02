@@ -60,11 +60,15 @@
         <div class="campo-busca">
           <input type="text" id="filtro-busca" placeholder="Buscar produto">
         </div>
-        <select id="filtro-preco" aria-label="Filtrar por preço">
-          <option value="">Todos os preços</option>
-          <option value="-500">Até R$ 500</option>
-          <option value="501-1000">R$ 501 até R$ 1.000</option>
-          <option value="1001-">Acima de R$ 1.000</option>
+        <select id="filtro-categoria" aria-label="Filtrar por categoria">
+          <option value="">Todas as categorias</option>
+          <option value="Hardware">Hardware</option>
+          <option value="Periféricos">Periféricos</option>
+          <option value="Componentes">Componentes</option>
+          <option value="Armazenamento">Armazenamento</option>
+          <option value="Redes">Redes</option>
+          <option value="Informática">Informática</option>
+          <option value="Outros">Outros</option>
         </select>
         <button id="btn-limpar-filtro" type="button">Limpar</button>
       </div>
@@ -76,6 +80,7 @@
               <th class="th-ordenavel" data-coluna="id">ID</th>
               <th class="th-ordenavel" data-coluna="created_at">Data de Cadastro</th>
               <th class="th-ordenavel" data-coluna="created_by">Usuário</th>
+              <th>Categoria</th>
               <th class="th-ordenavel" data-coluna="description">Descrição</th>
               <th class="th-ordenavel" data-coluna="quantity">Quantidade</th>
               <th class="th-ordenavel" data-coluna="price">Valor</th>
@@ -103,6 +108,18 @@
 
     <form id="form-produto">
       <input type="hidden" id="produto-id">
+
+      <label for="categoria">Categoria</label>
+      <select id="categoria" required>
+        <option value="" disabled selected>Selecione uma categoria</option>
+        <option value="Hardware">Hardware</option>
+        <option value="Periféricos">Periféricos</option>
+        <option value="Componentes">Componentes</option>
+        <option value="Armazenamento">Armazenamento</option>
+        <option value="Redes">Redes</option>
+        <option value="Informática">Informática</option>
+        <option value="Outros">Outros</option>
+      </select>
 
       <label for="descricao">Descrição</label>
       <input type="text" id="descricao" required>

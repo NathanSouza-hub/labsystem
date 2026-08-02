@@ -2,7 +2,7 @@ const connection = require("../database/connection");
 
 const SORTABLE_COLUMNS = ["id", "created_at", "created_by", "price", "description", "quantity"];
 
-// Listar todos (com busca opcional por id/descrição/usuário, faixa de preço e ordenação opcional)
+// Listar todos (com busca opcional por id/descrição/usuário, categoria e ordenação opcional)
 function getAllProducts(filters, callback) {
     const params = [];
     const condicoesWhere = [];
@@ -21,16 +21,9 @@ function getAllProducts(filters, callback) {
         condicoesWhere.push(`(${condicoesBusca.join(" OR ")})`);
     }
 
-    const precoMin = Number(filters.minPrice);
-    if (filters.minPrice !== undefined && filters.minPrice !== "" && !Number.isNaN(precoMin)) {
-        condicoesWhere.push("price >= ?");
-        params.push(precoMin);
-    }
-
-    const precoMax = Number(filters.maxPrice);
-    if (filters.maxPrice !== undefined && filters.maxPrice !== "" && !Number.isNaN(precoMax)) {
-        condicoesWhere.push("price <= ?");
-        params.push(precoMax);
+    if (filters.category) {
+        condicoesWhere.push("category = ?");
+        params.push(filters.category);
     }
 
     if (condicoesWhere.length > 0) {
@@ -64,8 +57,8 @@ function getProductById(id, callback) {
 function createProduct(product, callback) {
     const sql = `
         INSERT INTO products
-        (description, quantity, price, created_by)
-        VALUES (?, ?, ?, ?)
+        (description, quantity, price, category, created_by)
+        VALUES (?, ?, ?, ?, ?)
     `;
 
     connection.query(
@@ -74,6 +67,7 @@ function createProduct(product, callback) {
             product.description,
             product.quantity,
             product.price,
+            product.category,
             product.created_by
         ],
         callback
@@ -87,7 +81,8 @@ function updateProduct(id, product, callback) {
         SET
             description = ?,
             quantity = ?,
-            price = ?
+            price = ?,
+            category = ?
         WHERE id = ?
     `;
 
@@ -97,6 +92,7 @@ function updateProduct(id, product, callback) {
             product.description,
             product.quantity,
             product.price,
+            product.category,
             id
         ],
         callback

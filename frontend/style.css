@@ -615,7 +615,8 @@ td button:active {
   color: var(--color-text-muted);
 }
 
-.modal form input {
+.modal form input,
+.modal form select {
   width: 100%;
   padding: 9px 12px;
   margin-top: 6px;
@@ -625,7 +626,8 @@ td button:active {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.modal form input:focus {
+.modal form input:focus,
+.modal form select:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);

@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS products (
   description VARCHAR(255)   NOT NULL,
   quantity    INT            NOT NULL,
   price       DECIMAL(10,2)  NOT NULL,
+  category    VARCHAR(100)   NOT NULL,
   created_by  VARCHAR(100)   NOT NULL,
   created_at  DATETIME       DEFAULT CURRENT_TIMESTAMP
 );

@@ -169,11 +169,28 @@ routes → controller → service → repository → banco de dados
 - **controller:** trata a requisição/resposta HTTP (status codes, JSON)
 - **service:** camada intermediária de regra de negócio
 - **repository:** único lugar que executa queries SQL
-- **middlewares:** validação de dados (`validateProduct`, `validateAuth`, `validateUserUpdate`), autenticação (`requireAuth`), rota não encontrada (`notFound`) e tratamento central de erros (`errorHandler`)
+- **middlewares:** validação de dados (`validateProduct`, `validateAuth`, `validateRegister`, `validateUserUpdate`), autenticação (`requireAuth`), rota não encontrada (`notFound`) e tratamento central de erros (`errorHandler`)
+
+## Testes
+
+Testes unitários com **Jest**, cobrindo as camadas com lógica própria (não os controllers, que são só repasse HTTP fino):
+
+- **middlewares** (`validateProduct`, `validateAuth`, `validateRegister`, `validateUserUpdate`, `requireAuth`): funções puras, testadas com `req`/`res`/`next` simulados
+- **utils/jwt**: geração e verificação de token, incluindo rejeição de token corrompido ou assinado com outro segredo
+- **repositories/productRepository**: monta o SQL corretamente a partir dos filtros (busca, categoria, ordenação) e protege a whitelist de colunas ordenáveis contra SQL injection — testado com a conexão do banco mockada (não bate no banco de verdade)
+- **services/authService**: garante que a senha nunca é salva em texto puro e que login com usuário inexistente ou senha errada retorna `null`
+
+Rodar os testes:
+
+```bash
+cd backend
+npm test
+```
 
 ## Diferenciais implementados
 
 - Autenticação via JWT (cookie httpOnly), não sessão em memória
+- Testes unitários (Jest) cobrindo validações, JWT e a lógica de repositórios/serviços
 - Ordenação ASC/DESC dinâmica por ID, Data de Cadastro, Usuário e Valor (cabeçalhos clicáveis na tela de produtos)
 - Filtros na listagem de produtos e de usuários
 - CRUD completo de usuários (`usuarios.html`)

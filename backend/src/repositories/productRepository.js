@@ -1,6 +1,6 @@
 const connection = require("../database/connection");
 
-const SORTABLE_COLUMNS = ["id", "created_at", "created_by", "price"];
+const SORTABLE_COLUMNS = ["id", "created_at", "created_by", "price", "description", "quantity"];
 
 // Listar todos (com busca opcional por id/descrição/usuário e ordenação opcional)
 function getAllProducts(filters, callback) {

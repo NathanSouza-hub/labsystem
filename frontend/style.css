@@ -139,6 +139,20 @@ body {
   color: #fff;
 }
 
+.sidebar-user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
 .sidebar.collapsed .sidebar-brand-text,
 .sidebar.collapsed .sidebar-link-text {
   display: none;
@@ -158,10 +172,10 @@ body {
 .perfil-trigger {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   background: none;
   border: 1px solid transparent;
-  padding: 4px 10px 4px 4px;
+  padding: 4px;
   border-radius: 999px;
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease;
@@ -172,35 +186,10 @@ body {
   border-color: var(--color-border);
 }
 
-.perfil-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: var(--color-primary);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-.perfil-nome {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 160px;
-}
-
 .perfil-seta {
   font-size: 11px;
   color: var(--color-text-muted);
-  flex-shrink: 0;
+  margin-right: 4px;
 }
 
 .perfil-menu {
@@ -430,10 +419,6 @@ main {
     max-width: none;
     flex-basis: 100%;
     order: 1;
-  }
-
-  .perfil-nome {
-    display: none;
   }
 }
 

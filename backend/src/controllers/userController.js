@@ -2,9 +2,9 @@ const userService = require("../services/userService");
 
 // Listar todos
 function getUsers(req, res) {
-    const { q } = req.query;
+    const { q, sort, order } = req.query;
 
-    userService.listUsers({ q }, (error, users) => {
+    userService.listUsers({ q, sort, order }, (error, users) => {
         if (error) {
             return res.status(500).json({
                 error: "Erro ao buscar usuários."

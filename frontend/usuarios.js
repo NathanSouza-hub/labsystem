@@ -18,7 +18,10 @@ const campoPassword = document.getElementById("password");
 const ajudaSenha = document.getElementById("ajuda-senha");
 
 const campoFiltroBusca = document.getElementById("filtro-busca");
+const cabecalhosOrdenaveis = document.querySelectorAll(".th-ordenavel");
 
+let colunaOrdenacao = "id";
+let ordemAtual = "asc";
 let buscaAtual = "";
 let debounceBusca = null;
 
@@ -54,12 +57,38 @@ campoFiltroBusca.addEventListener("input", () => {
 });
 formUsuario.addEventListener("submit", salvarUsuario);
 
+cabecalhosOrdenaveis.forEach((th) => {
+    th.addEventListener("click", () => ordenarPor(th.dataset.coluna));
+});
+
 verificarAutenticacao();
 
 function limparFiltro() {
     buscaAtual = "";
     campoFiltroBusca.value = "";
     carregarUsuarios();
+}
+
+function ordenarPor(coluna) {
+    if (colunaOrdenacao === coluna) {
+        ordemAtual = ordemAtual === "asc" ? "desc" : "asc";
+    } else {
+        colunaOrdenacao = coluna;
+        ordemAtual = "asc";
+    }
+
+    atualizarIndicadoresOrdenacao();
+    carregarUsuarios();
+}
+
+function atualizarIndicadoresOrdenacao() {
+    cabecalhosOrdenaveis.forEach((th) => {
+        th.classList.remove("ordenado-asc", "ordenado-desc");
+
+        if (th.dataset.coluna === colunaOrdenacao) {
+            th.classList.add(ordemAtual === "asc" ? "ordenado-asc" : "ordenado-desc");
+        }
+    });
 }
 
 async function verificarAutenticacao() {
@@ -73,6 +102,7 @@ async function verificarAutenticacao() {
 
         const dados = await resposta.json();
         usuarioLogado.textContent = dados.username;
+        atualizarIndicadoresOrdenacao();
         carregarUsuarios();
     } catch (erro) {
         window.location.href = "login.html";
@@ -92,6 +122,8 @@ async function carregarUsuarios() {
 
     const params = new URLSearchParams();
     if (buscaAtual) params.set("q", buscaAtual);
+    params.set("sort", colunaOrdenacao);
+    params.set("order", ordemAtual);
 
     try {
         const resposta = await fetch(`${API_URL}?${params.toString()}`, { credentials: "include" });

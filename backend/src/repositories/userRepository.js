@@ -1,5 +1,7 @@
 const connection = require("../database/connection");
 
+const SORTABLE_COLUMNS = ["id", "username", "created_at"];
+
 // Buscar por username
 function getUserByUsername(username, callback) {
     const sql = "SELECT * FROM users WHERE username = ?";
@@ -40,7 +42,12 @@ function getAllUsers(filters, callback) {
         sql += ` WHERE (${condicoes.join(" OR ")})`;
     }
 
-    sql += " ORDER BY username ASC";
+    if (SORTABLE_COLUMNS.includes(filters.sort)) {
+        const order = filters.order === "desc" ? "DESC" : "ASC";
+        sql += ` ORDER BY ${filters.sort} ${order}`;
+    } else {
+        sql += " ORDER BY username ASC";
+    }
 
     connection.query(sql, params, callback);
 }

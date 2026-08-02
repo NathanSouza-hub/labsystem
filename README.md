@@ -2,6 +2,8 @@
 
 Sistema de cadastro de produtos (Create, Read, Update, Delete), com autenticação por sessão.
 
+**Repositório:** https://github.com/NathanSouza-hub/labsystem
+
 ## Tecnologias
 
 - **Back-end:** Node.js + Express

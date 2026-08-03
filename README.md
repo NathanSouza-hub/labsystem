@@ -129,10 +129,10 @@ Base URL: `http://localhost:3000`. Todas as rotas exigem token JWT válido — q
 |--------|---------------|-----------------------------------------------|-------------------------------------------|
 | GET    | `/users`      | Lista usuários (aceita `?q=` por ID/username) | —                                         |
 | GET    | `/users/:id`  | Busca um usuário pelo ID                      | —                                         |
-| PUT    | `/users/:id`  | Atualiza username e, opcionalmente, a senha   | `{ "username": "", "password": "" }`     |
+| PUT    | `/users/:id`  | Atualiza dados do usuário e, opcionalmente, a senha | `{ "username": "", "password": "", "name": "", "email": "", "phone": "" }` |
 | DELETE | `/users/:id`  | Exclui um usuário                             | —                                         |
 
-`password_hash` nunca é retornado pela API. No `PUT`, `password` é opcional — se omitido ou vazio, a senha atual é mantida; se enviado, precisa ter no mínimo 6 caracteres. Criação de usuário usa o mesmo endpoint de `POST /auth/register` (reaproveitado pela tela de Usuários). `DELETE` bloqueia a exclusão do último usuário do sistema (`400`) e, se o usuário excluir a própria conta, o cookie do token é limpo automaticamente (resposta inclui `"selfDeleted": true`).
+`password_hash` nunca é retornado pela API. No `PUT`, `username`, `name`, `email` e `phone` são obrigatórios; `password` é opcional — se omitido ou vazio, a senha atual é mantida; se enviado, precisa ter no mínimo 6 caracteres. Criação de usuário usa o mesmo endpoint de `POST /auth/register` (reaproveitado pela tela de Usuários). `DELETE` bloqueia a exclusão do último usuário do sistema (`400`) e, se o usuário excluir a própria conta, o cookie do token é limpo automaticamente (resposta inclui `"selfDeleted": true`).
 
 ## Estrutura da tabela `products`
 

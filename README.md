@@ -60,8 +60,10 @@ FRONTEND_URL=http://localhost:5500
 Inicie o servidor:
 
 ```bash
-node src/server.js
+npm run dev
 ```
+
+(usa `nodemon`, reinicia sozinho a cada alteração; `npm start` sobe sem isso)
 
 A API sobe em `http://localhost:3000`.
 
@@ -79,6 +81,8 @@ npx http-server -p 5500
 Depois acesse `http://localhost:5500/login.html`.
 
 > O CORS está restrito à origem definida em `FRONTEND_URL` (não é mais `*`), pois a autenticação depende de cookies — o front-end precisa rodar exatamente nessa origem.
+>
+> **Importante:** acesse sempre via `localhost` (`http://localhost:5500/...`), nunca `http://127.0.0.1:5500/...`. Embora o CORS aceite as duas, o cookie do token é `SameSite=Lax` — o navegador não o envia em requisições entre `127.0.0.1` e `localhost` por serem consideradas origens diferentes, então o login parece "não fazer nada" (a chamada funciona, só que sem o cookie).
 
 ## Autenticação
 
@@ -90,12 +94,12 @@ As rotas de leitura de produtos (`GET`) continuam públicas. As rotas de escrita
 
 | Método | Rota            | Descrição                              | Body (JSON)                              |
 |--------|-----------------|------------------------------------------|-------------------------------------------|
-| POST   | `/auth/register`| Cadastra um novo usuário                 | `{ "username": "", "password": "" }`     |
+| POST   | `/auth/register`| Cadastra um novo usuário                 | `{ "username": "", "password": "", "name": "", "email": "", "phone": "" }` |
 | POST   | `/auth/login`   | Autentica e gera o token JWT             | `{ "username": "", "password": "" }`     |
 | POST   | `/auth/logout`  | Limpa o cookie do token                  | —                                         |
 | GET    | `/auth/me`      | Retorna o usuário do token atual         | —                                         |
 
-`password` deve ter no mínimo 6 caracteres. Requisições ao front-end para a API precisam enviar `credentials: "include"` para que o cookie do token seja incluído.
+No cadastro (`/auth/register`), `password` deve ter no mínimo 6 caracteres, e `name`, `email` (formato válido, único) e `phone` são obrigatórios. Requisições ao front-end para a API precisam enviar `credentials: "include"` para que o cookie do token seja incluído.
 
 ## Endpoints da API
 
@@ -149,13 +153,16 @@ Base URL: `http://localhost:3000`. Todas as rotas exigem token JWT válido — q
 | id            | INT (PK, AI)  | Identificador do usuário        |
 | username      | VARCHAR(100)  | Nome de usuário (único)         |
 | password_hash | VARCHAR(255)  | Hash bcrypt da senha             |
+| name          | VARCHAR(150)  | Nome completo                   |
+| email         | VARCHAR(150)  | E-mail (único)                  |
+| phone         | VARCHAR(20)   | Telefone                        |
 | created_at    | DATETIME      | Data de cadastro (automática)   |
 
 ## Páginas do front-end
 
-- `login.html` — login e cadastro de usuário (tela sem sidebar)
-- `index.html` — CRUD de produtos: busca única por ID/descrição/usuário, ordenação dinâmica ASC/DESC clicando nos cabeçalhos das colunas ID, Data de Cadastro, Usuário e Valor, cabeçalho fixo da tabela, estado vazio dedicado, e modal (sem navegação de página) para criar/editar
-- `usuarios.html` — CRUD de usuários: listar, buscar por ID/username, criar, editar (username e/ou senha) e excluir
+- `login.html` — login e cadastro de usuário (nome, e-mail, telefone), tela sem sidebar
+- `index.html` — CRUD de produtos: busca por ID/descrição/usuário, filtro por categoria, ordenação dinâmica ASC/DESC clicando nos cabeçalhos das colunas ID, Data de Cadastro, Usuário, Descrição, Quantidade e Valor, cabeçalho fixo da tabela, estado vazio dedicado, e modal (sem navegação de página) para criar/editar — com seleção de categoria obrigatória
+- `usuarios.html` — CRUD de usuários: listar, buscar por ID/username, ordenar por ID/Usuário/Data de Cadastro, criar, editar (username e/ou senha) e excluir
 
 ## Arquitetura do back-end
 
@@ -191,8 +198,9 @@ npm test
 
 - Autenticação via JWT (cookie httpOnly), não sessão em memória
 - Testes unitários (Jest) cobrindo validações, JWT e a lógica de repositórios/serviços
-- Ordenação ASC/DESC dinâmica por ID, Data de Cadastro, Usuário e Valor (cabeçalhos clicáveis na tela de produtos)
-- Filtros na listagem de produtos e de usuários
+- Ordenação ASC/DESC dinâmica por ID, Data de Cadastro, Usuário, Descrição, Quantidade e Valor (produtos) e ID/Usuário/Data de Cadastro (usuários) — cabeçalhos clicáveis
+- Filtro por categoria na listagem de produtos, combinável com a busca por texto
+- Categorização de produtos (select fixo, sem digitação livre)
 - CRUD completo de usuários (`usuarios.html`)
 - Tela de login e cadastro de usuário
 - Data de cadastro e usuário logado preenchidos automaticamente pelo sistema (não digitados manualmente)

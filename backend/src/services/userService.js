@@ -20,7 +20,7 @@ function countUsers(callback) {
 
 // Atualizar (senha só é alterada se enviada)
 function updateUser(id, data, callback) {
-    userRepository.updateUsername(id, data.username, (error) => {
+    userRepository.updateProfile(id, data, (error) => {
         if (error) return callback(error);
 
         if (!data.password) {

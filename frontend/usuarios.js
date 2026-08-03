@@ -16,6 +16,9 @@ const campoId = document.getElementById("usuario-id");
 const campoUsername = document.getElementById("username");
 const campoPassword = document.getElementById("password");
 const ajudaSenha = document.getElementById("ajuda-senha");
+const campoNome = document.getElementById("nome");
+const campoEmail = document.getElementById("email");
+const campoTelefone = document.getElementById("telefone");
 
 const campoFiltroBusca = document.getElementById("filtro-busca");
 const cabecalhosOrdenaveis = document.querySelectorAll(".th-ordenavel");
@@ -246,6 +249,9 @@ function abrirModal(usuario) {
         modalTitulo.textContent = "Editar Usuário";
         campoId.value = usuario.id;
         campoUsername.value = usuario.username;
+        campoNome.value = usuario.name || "";
+        campoEmail.value = usuario.email || "";
+        campoTelefone.value = usuario.phone || "";
         campoPassword.required = false;
         ajudaSenha.textContent = "Deixe em branco para manter a senha atual.";
     } else {
@@ -269,10 +275,15 @@ async function salvarUsuario(evento) {
     const id = campoId.value;
     const username = campoUsername.value.trim();
     const password = campoPassword.value;
+    const name = campoNome.value.trim();
+    const email = campoEmail.value.trim();
+    const phone = campoTelefone.value.trim();
 
     const url = id ? `${API_URL}/${id}` : `${AUTH_URL}/register`;
     const metodo = id ? "PUT" : "POST";
-    const corpo = id ? { username, password: password || undefined } : { username, password };
+    const corpo = id
+        ? { username, password: password || undefined, name, email, phone }
+        : { username, password, name, email, phone };
 
     try {
         const resposta = await fetch(url, {

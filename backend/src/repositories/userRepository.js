@@ -58,7 +58,7 @@ function getAllUsers(filters, callback) {
 
 // Buscar por ID (sem expor password_hash)
 function getUserById(id, callback) {
-    const sql = "SELECT id, username, created_at FROM users WHERE id = ?";
+    const sql = "SELECT id, username, name, email, phone, created_at FROM users WHERE id = ?";
 
     connection.query(sql, [id], (error, results) => {
         if (error) return callback(error);
@@ -78,11 +78,11 @@ function countUsers(callback) {
     });
 }
 
-// Atualizar username
-function updateUsername(id, username, callback) {
-    const sql = "UPDATE users SET username = ? WHERE id = ?";
+// Atualizar dados do perfil (username, nome, email, telefone)
+function updateProfile(id, data, callback) {
+    const sql = "UPDATE users SET username = ?, name = ?, email = ?, phone = ? WHERE id = ?";
 
-    connection.query(sql, [username, id], callback);
+    connection.query(sql, [data.username, data.name, data.email, data.phone, id], callback);
 }
 
 // Atualizar senha
@@ -105,7 +105,7 @@ module.exports = {
     getAllUsers,
     getUserById,
     countUsers,
-    updateUsername,
+    updateProfile,
     updatePasswordHash,
     deleteUser
 };

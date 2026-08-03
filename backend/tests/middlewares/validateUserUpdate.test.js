@@ -9,7 +9,7 @@ function criarResposta() {
 
 describe("validateUserUpdate", () => {
     it("chama next() quando username é enviado sem password (senha opcional)", () => {
-        const req = { body: { username: "joao" } };
+        const req = { body: { username: "joao", name: "João Silva", email: "joao@example.com", phone: "11999999999" } };
         const res = criarResposta();
         const next = jest.fn();
 
@@ -19,7 +19,7 @@ describe("validateUserUpdate", () => {
     });
 
     it("chama next() quando password é enviado vazio (mantém a senha atual)", () => {
-        const req = { body: { username: "joao", password: "" } };
+        const req = { body: { username: "joao", password: "", name: "João Silva", email: "joao@example.com", phone: "11999999999" } };
         const res = criarResposta();
         const next = jest.fn();
 
